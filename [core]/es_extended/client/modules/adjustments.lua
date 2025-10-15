@@ -236,114 +236,45 @@ function Adjustments:Multipliers()
 end
 
 function Adjustments:ApplyPlayerStats()
- if not Config.PlayerStatsByGender.enabled then return end
-
-    if Config.PlayerStatsByGender.debugMode then
-        print('[^3adjustments^7] applying player stats...')
-    end
-
-    if Config.EnableDebug then
-        print('[^3adjustments^7] applying player stats...')
-    end
+    if not Config.PlayerStatsByGender.enabled then return end
 
     local gender = self:GetPlayerGender()
-    if not gender then
-        if Config.PlayerStatsByGender.debugMode then
-            print('[^1adjustments^7] failed to detect gender')
-        end
-        return
-    end
+    if not gender then return end
 
     local stats = Config.PlayerStatsByGender[gender]
-    if not stats then
-        if Config.PlayerStatsByGender.debugMode then
-            print('[^1adjustments^7] no stats found for gender: ' .. gender)
-        end
-        return
-    end
+    if not stats then return end
 
-    if stats.stamina then
-        SetRunSprintMultiplierForPlayer(ESX.playerId, stats.stamina)
-        if Config.PlayerStatsByGender.debugMode then
-            print('[^2adjustments^7] stamina: ' .. tostring(stats.stamina))
-        end
-    end
 
-    if stats.strength then
-        SetPlayerMeleeWeaponDamageModifier(ESX.playerId, stats.strength)
-        if Config.PlayerStatsByGender.debugMode then
-            print('[^2adjustments^7] strength: ' .. tostring(stats.strength))
-        end
-    end
+    SetPlayerMaxStamina(ESX.playerId, 100.0)
+    RestorePlayerStamina(ESX.playerId, 100.0)
+    SetRunSprintMultiplierForPlayer(ESX.playerId, stats.stamina)
+    SetSwimMultiplierForPlayer(ESX.playerId, stats.stamina)
 
-    if stats.swimSpeed then
-        SetSwimMultiplierForPlayer(ESX.playerId, stats.swimSpeed)
-        if Config.PlayerStatsByGender.debugMode then
-            print('[^2adjustments^7] swimSpeed: ' .. tostring(stats.swimSpeed))
-        end
-    end
+    SetPedMoveRateOverride(ESX.PlayerData.ped, stats.stamina)
 
-    if stats.moveSpeed then
-        self.currentMoveSpeed = stats.moveSpeed
-        if not self.moveSpeedThreadRunning then
-            self.moveSpeedThreadRunning = true
-            CreateThread(function()
-                while Config.PlayerStatsByGender.enabled and self.currentMoveSpeed do
-                    if ESX.PlayerData.ped then
-                        SetPedMoveRateOverride(ESX.PlayerData.ped, self.currentMoveSpeed)
-                    end
-                    Wait(0)
-                end
-                self.moveSpeedThreadRunning = false
-            end)
-        end
-    end
-
-    if Config.EnableDebug then
-        print('[^2adjustments^7] stats applied for gender: ' .. gender)
-    end
+    SetPlayerMeleeWeaponDamageModifier(ESX.playerId, stats.strength)
+    SetPlayerWeaponDamageModifier(ESX.playerId, stats.strength)
 end
 
 function Adjustments:GetPlayerGender()
-    if not ESX.PlayerLoaded then
-        if Config.PlayerStatsByGender.debugMode then
-            print('[^1adjustments^7] player not loaded yet')
-        end
-        return
-    end
-
-    if Config.PlayerStatsByGender.debugMode then
-        print('[^3adjustments^7] detecting gender using: ' .. (Config.PlayerStatsByGender.useCharacterData and 'character data' or 'ped model'))
-    end
+    if not ESX.PlayerLoaded then return end
 
     if Config.PlayerStatsByGender.useCharacterData then
-        -- Option 1: character data
         if ESX.PlayerData.sex then
             return ESX.PlayerData.sex == 'm' and 'male' or 'female'
         end
+
+        if ESX.PlayerData.gender then
+            return ESX.PlayerData.gender == 0 and 'male' or 'female'
+        end
     else
-        -- Option 2: ped model
         local model = GetEntityModel(ESX.PlayerData.ped)
-
-        for i = 1, #Config.PlayerStatsByGender.malePeds do
-            if model == Config.PlayerStatsByGender.malePeds[i] then
-                return 'male'
-            end
+        if model == `mp_m_freemode_01` then
+            return 'male'
+        elseif model == `mp_f_freemode_01` then
+            return 'female'
         end
 
-        for i = 1, #Config.PlayerStatsByGender.femalePeds do
-            if model == Config.PlayerStatsByGender.femalePeds[i] then
-                return 'female'
-            end
-        end
-
-        for i = 1, #Config.PlayerStatsByGender.femalePeds do
-            if model == Config.PlayerStatsByGender.femalePeds[i] then
-                return 'female'
-            end
-        end
-
-        -- Native fallback
         if IsPedMale(ESX.PlayerData.ped) then
             return 'male'
         else
@@ -354,9 +285,21 @@ function Adjustments:GetPlayerGender()
     return nil
 end
 
-
 function Adjustments:RefreshPlayerStats()
-      self:ApplyPlayerStats()
+    if not Config.PlayerStatsByGender.enabled then return end
+
+    local gender = self:GetPlayerGender()
+    if not gender then return end
+
+    local stats = Config.PlayerStatsByGender[gender]
+    if not stats then return end
+
+    SetRunSprintMultiplierForPlayer(ESX.playerId, stats.stamina)
+    SetSwimMultiplierForPlayer(ESX.playerId, stats.stamina)
+    SetPedMoveRateOverride(ESX.PlayerData.ped, stats.stamina)
+
+    SetPlayerMeleeWeaponDamageModifier(ESX.playerId, stats.strength)
+    SetPlayerWeaponDamageModifier(ESX.playerId, stats.strength)
 end
 
 function Adjustments:Load()
@@ -376,35 +319,14 @@ function Adjustments:Load()
     self:Multipliers()
 
     AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, skin)
-        if Config.PlayerStatsByGender.debugMode then
-            print('[^3adjustments^7] esx:playerloaded event triggered')
-        end
         self:ApplyPlayerStats()
     end)
 
-    if not Config.PlayerStatsByGender.useCharacterData then
-        AddEventHandler('skinchanger:modelLoaded', function()
-            if Config.PlayerStatsByGender.debugMode then
-                print('[^3adjustments^7] skinchanger:modelloaded event triggered')
-            end
-            self:RefreshPlayerStats()
-        end)
-    else
-        if Config.PlayerStatsByGender.debugMode then
-            print('[^3adjustments^7] skinchanger event not registered (using character data)')
-        end
-    end
-
-    AddEventHandler('esx:onPlayerSpawn', function()
-         if Config.PlayerStatsByGender.debugMode then
-            print('[^3adjustments^7] esx:onplayerspawn event triggered')
-        end
+    AddEventHandler('skinchanger:modelLoaded', function()
         self:RefreshPlayerStats()
     end)
-    if Config.PlayerStatsByGender.enabled and Config.PlayerStatsByGender.debugMode then
-        print('[^2adjustments^7] player stats by gender loaded')
-        print('[^3adjustments^7] enabled: ' .. tostring(Config.PlayerStatsByGender.enabled))
-        print('[^3adjustments^7] use character data: ' .. tostring(Config.PlayerStatsByGender.useCharacterData))
-        print('[^3adjustments^7] debug mode: active')
-    end
+
+    AddEventHandler('esx:onPlayerSpawn', function()
+        self:RefreshPlayerStats()
+    end)
 end
