@@ -252,8 +252,26 @@ function Adjustments:ApplyPlayerStats()
 
     SetPedMoveRateOverride(ESX.PlayerData.ped, stats.stamina)
 
-    SetPlayerMeleeWeaponDamageModifier(ESX.playerId, stats.strength)
-    SetPlayerWeaponDamageModifier(ESX.playerId, stats.strength)
+    -- moveSpeed requires continuous loop
+    if stats.moveSpeed then
+        self.currentMoveSpeed = stats.moveSpeed
+        if not self.moveSpeedThreadRunning then
+            self.moveSpeedThreadRunning = true
+            CreateThread(function()
+                while Config.PlayerStatsByGender.enabled and self.currentMoveSpeed do
+                    if ESX.PlayerData.ped then
+                        SetPedMoveRateOverride(ESX.PlayerData.ped, self.currentMoveSpeed)
+                    end
+                    Wait(0)
+                end
+                self.moveSpeedThreadRunning = false
+            end)
+        end
+    end
+
+    if Config.EnableDebug then
+        print('[^2adjustments^7] stats applied for gender: ' .. gender)
+    end
 end
 
 function Adjustments:GetPlayerGender()
