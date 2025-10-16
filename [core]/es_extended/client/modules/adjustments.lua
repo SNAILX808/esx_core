@@ -351,4 +351,25 @@ function Adjustments:Load()
     self:WantedLevel()
     self:DisableRadio()
     self:Multipliers()
+
+    AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, skin)
+        self:ApplyPlayerStats()
+    end)
+
+    if not Config.PlayerStatsByGender.useCharacterData then
+        AddEventHandler('skinchanger:modelLoaded', function()
+            self:ApplyPlayerStats()
+        end)
+    end
+
+    AddEventHandler('esx:onPlayerSpawn', function()
+        self:ApplyPlayerStats()
+    end)
+
+    if Config.PlayerStatsByGender.enabled and Config.EnableDebug then
+        print('[^2adjustments^7] player stats by gender loaded')
+        print('[^3adjustments^7] enabled: ' .. tostring(Config.PlayerStatsByGender.enabled))
+        print('[^3adjustments^7] use character data: ' .. tostring(Config.PlayerStatsByGender.useCharacterData))
+        print('[^3adjustments^7] debug mode: active')
+    end
 end
