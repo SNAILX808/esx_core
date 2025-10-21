@@ -2,6 +2,8 @@ local loadingScreenFinished = false
 local ready = false
 local guiEnabled = false
 local timecycleModifier = "hud_def_blur"
+local countryList = json.decode(Config.countryList)
+ --TODO: make the ui fetch countries from countryList
 
 ESX.SecureNetEvent("esx_identity:alreadyRegistered", function()
     while not loadingScreenFinished do
@@ -18,6 +20,7 @@ ESX.SecureNetEvent("esx_identity:setPlayerData", function(data)
         ESX.SetPlayerData("dateofbirth", data.dateOfBirth)
         ESX.SetPlayerData("sex", data.sex)
         ESX.SetPlayerData("height", data.height)
+        ESX.SetPlayerData("nationality", data.nationality)
     end)
 end)
 
@@ -27,6 +30,7 @@ end)
 
 RegisterNUICallback("ready", function(_, cb)
     ready = true
+    SendNUIMessage({ type = "config", data = Config })
     cb(1)
 end)
 
