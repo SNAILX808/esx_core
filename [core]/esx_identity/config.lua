@@ -1,6 +1,6 @@
 Config = {}
 Config.Locale = GetConvar("esx:locale", "en")
-Config.countryList = LoadResourceFile(GetCurrentResourceName(), "countries.json")
+Config.countryList = ESX.require("countries")
 
 -- [Config.EnableCommands]
 -- Enables Commands Such As /char and /chardel

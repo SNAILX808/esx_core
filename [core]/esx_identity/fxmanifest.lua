@@ -26,7 +26,7 @@ client_scripts {
 files ({
 	'web/dist/assets/**',
 	'web/dist/**',
-	'countries.json'
+	'countries.lua'
 })
 
 ui_page 'web/dist/index.html'

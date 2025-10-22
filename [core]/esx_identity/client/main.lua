@@ -2,8 +2,7 @@ local loadingScreenFinished = false
 local ready = false
 local guiEnabled = false
 local timecycleModifier = "hud_def_blur"
-local countryList = json.decode(Config.countryList)
- --TODO: make the ui fetch countries from countryList
+ --TODO: make the ui fetch countries from countryList using Config.countryList
 
 ESX.SecureNetEvent("esx_identity:alreadyRegistered", function()
     while not loadingScreenFinished do

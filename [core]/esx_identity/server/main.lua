@@ -1,7 +1,6 @@
 local playerIdentity = {}
 local alreadyRegistered = {}
 local multichar = ESX.GetConfig().Multichar
-local countryList = json.decode(Config.countryList)
 
 local function deleteIdentityFromDatabase(xPlayer)
     MySQL.query.await("UPDATE users SET firstname = ?, lastname = ?, dateofbirth = ?, sex = ?, height = ?, nationality = ?, skin = ? WHERE identifier = ?", { nil, nil, nil, nil, nil, nil, nil, xPlayer.identifier })
@@ -125,7 +124,8 @@ local function checkNationalityFormat(nationality)
 end
 
 local function isValidNationality(nationality)
-    for _, country in ipairs(countryList.nationalities) do
+    for i = 1, #Config.countryList do
+        local country = Config.countryList[i]
         if string.lower(country.value) == string.lower(nationality) then
             return true
         end
