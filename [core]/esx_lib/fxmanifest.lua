@@ -15,6 +15,7 @@ files {
 }
 
 shared_scripts {
+    'resource/init.lua',
     'resource/**/shared.lua',
 }
 

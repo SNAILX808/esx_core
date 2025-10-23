@@ -9,21 +9,22 @@
 
 -- Const Variables
 local CONTEXT<const> = IsDuplicityVersion() and 'server' or 'client'
-local LIB_NAME<const> = 'esx_lib'
+local LIB_NAME <const> = 'esx_lib'
+local IS_DEBUG <const> = GetConvar('xLib:debug', 'false') == 'true'
 
--- xLib class for Language Server
+
+---@alias Module table | function
 ---@class xLib
 ---@field name string
 ---@field side 'server' | 'client'
-
----@alias Module table | function
 
 -------------------------------------------------
 --- Core functions for modules
 -------------------------------------------------
 
 --- Function that returns nothing
-local function noop() end
+--- Used as a "shortcut"
+function Noop() end
 
 ---Loads a module into memory
 ---@param self xLib
@@ -31,20 +32,19 @@ local function noop() end
 ---@return Module | nil
 local function loadModule(self, name)
     local directory = ('imports/%s'):format(name)
-    local chunk = LoadResourceFile(LIB_NAME, ('%s/%s.lua'):format(directory, CONTEXT)) -- returns a raw lua code as a string (SERVER/CLIENT side)
-    local shared_chunk = LoadResourceFile(LIB_NAME, ('%s/shared.lua'):format(directory)) -- returns a raw lua code as a string (SHARED)
+    local chunk = LoadResourceFile(LIB_NAME, ('%s/%s.lua'):format(directory, CONTEXT))
+    local shared_chunk = LoadResourceFile(LIB_NAME, ('%s/shared.lua'):format(directory))
 
     if shared_chunk then
-        chunk = chunk and ('%s\n%s'):format(shared_chunk, chunk) or shared_chunk -- creates a string with shared and client/server code combined
+        chunk = chunk and ('%s\n%s'):format(shared_chunk, chunk) or shared_chunk 
     end
 
     if not chunk then
-        -- Early exit if the code doesn't exist 
-        return 
+        return
     end
 
     -- Second argument is a chunk name
-    local fn, err = load(chunk, ('@%s/imports/%s/%s.lua'):format(LIB_NAME, name, CONTEXT))
+    local fn, err = load(chunk, ('@@%s/imports/%s/%s.lua'):format(LIB_NAME, name, CONTEXT))
 
     if not fn or err then
         if shared_chunk then
@@ -52,16 +52,16 @@ local function loadModule(self, name)
                 name, LIB_NAME))
 
             -- Tries to load only shared.lua
-            fn, err = load(shared_chunk, ('@%s/imports/%s/%s.lua'):format(LIB_NAME, name, 'shared'))
+            fn, err = load(shared_chunk, ('@@%s/imports/%s/%s.lua'):format(LIB_NAME, name, 'shared'))
         end
 
         if not fn or err then
-            return error(('Completly field importing module - %s; error - %s'):format(name, err))
+            return error(('Completly failed importing module - %s; error - %s'):format(name, err))
         end
     end
 
     local result = fn()
-    self[name] = result or noop
+    self[name] = result or Noop
 
     return self[name]
 end
@@ -76,12 +76,20 @@ local function call(self, index, ...)
 
     -- Module Loading
     if not module then
-        self[index] = noop -- to prevent module from loading again if doesn't exists.
+        self[index] = Noop -- to prevent module from loading again if doesn't exists.
 
         module = loadModule(self, index)
 
         if not module then
-            return error(('[%s] Tried to access an invalid module - %s!'):format(LIB_NAME, index))
+            local function method(...) 
+               return exports[index](nil, ...)
+            end
+                
+            if not ... then
+                self[index] = method
+            end
+
+            return method
         end
     end
 
@@ -93,12 +101,12 @@ end
 --- Environment Setup
 -------------------------------------------------
 
-
 -- Creation of xLib object
----@class xLib
+---@diagnostic disable-next-line: lowercase-global
 local xLib = setmetatable({
     name = LIB_NAME,
-    side = CONTEXT
+    side = CONTEXT,
+    debug = IS_DEBUG
 }, {
     -- Lazy Loading - loads module only when accessed
     __index = call,
@@ -107,3 +115,4 @@ local xLib = setmetatable({
 
 -- Allows to xLib to be accessible in resource that imports a lib
 _ENV.xLib = xLib
+_ENV.require = xLib.require
