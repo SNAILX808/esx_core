@@ -116,6 +116,7 @@ local function checkHeightFormat(height)
     return numHeight >= Config.MinHeight and numHeight <= Config.MaxHeight
 end
 
+---@param nationality string
 local function checkNationalityFormat(nationality)
     if ESX.IsValidLocaleString(nationality) then
         return true
@@ -123,10 +124,12 @@ local function checkNationalityFormat(nationality)
     return false
 end
 
+---@param nationality string
 local function isValidNationality(nationality)
+    local normalizedNationality = string.lower(nationality)
     for i = 1, #Config.countryList do
         local country = Config.countryList[i]
-        if string.lower(country.value) == string.lower(nationality) then
+        if string.lower(country.value) == normalizedNationality then
             return true
         end
     end
