@@ -99,6 +99,7 @@
 ---@field getPlayTime fun(): number                                  # Get total playtime in seconds.
 ---@field set fun(k: string, v: any)                                # Set custom variable.
 ---@field get fun(k: string): any                                    # Get custom variable.
+---@field updatePlayerData fun(key: string, value: any)              # Update player data
 --- Metadata Functions
 ---@field getMeta fun(index?: string, subIndex?: string|table): any   # Get metadata value(s).
 ---@field setMeta fun(index: string, value: any, subValue?: any)      # Set metadata value(s).
@@ -298,6 +299,10 @@ function CreateExtendedPlayer(playerId, identifier, ssn, group, accounts, invent
 
     function self.get(k)
         return self.variables[k]
+    end
+
+    function self.updatePlayerData(key, value)
+        TriggerClientEvent("esx:updatePlayerData", self.source, key, value)
     end
 
     function self.getAccounts(minimal)
