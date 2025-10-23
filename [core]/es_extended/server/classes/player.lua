@@ -302,7 +302,7 @@ function CreateExtendedPlayer(playerId, identifier, ssn, group, accounts, invent
     end
 
     function self.updatePlayerData(key, value)
-        TriggerClientEvent("esx:updatePlayerData", self.source, key, value)
+        self.triggerEvent("esx:updatePlayerData", key, value)
     end
 
     function self.getAccounts(minimal)
