@@ -193,4 +193,6 @@ return {
     { value = "Yemen", label = "Yemen", flag = "🇾🇪" },
     { value = "Zambia", label = "Zambia", flag = "🇿🇲" },
     { value = "Zimbabwe", label = "Zimbabwe", flag = "🇿🇼" },
+    { value = "Palestine", label = "Palestine", flag = "🇵🇸" },
+    { value = "Kosovo", label = "Kosovo", flag = "🇽🇰" }
 }
