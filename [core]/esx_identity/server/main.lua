@@ -22,7 +22,7 @@ function SetPlayerData(xPlayer, data)
     xPlayer.set("dateofbirth", data.dateOfBirth)
     xPlayer.set("sex", data.sex)
     xPlayer.set("height", data.height)
-    xPlayer.set("nationality", data.nationality)
+    xPlayer.setNationality(data.nationality)
 
     local state = Player(xPlayer.getSource()).state
     state:set("name", name, true)
@@ -31,7 +31,6 @@ function SetPlayerData(xPlayer, data)
     state:set("dateofbirth", data.dateOfBirth, true)
     state:set("sex", data.sex, true)
     state:set("height", data.height, true)
-    state:set("nationality", data.nationality, true)
 end
 
 ---@param xPlayer xPlayer
@@ -117,6 +116,7 @@ local function checkHeightFormat(height)
 end
 
 ---@param nationality string
+---@return boolean true if the nationality format is valid, false otherwise
 local function checkNationalityFormat(nationality)
     if ESX.IsValidLocaleString(nationality) then
         return true
@@ -125,6 +125,7 @@ local function checkNationalityFormat(nationality)
 end
 
 ---@param nationality string
+---@return boolean true if the nationality is in the country list, false otherwise
 local function isValidNationality(nationality)
     local normalizedNationality = string.lower(nationality)
     for i = 1, #Config.countryList do
@@ -442,8 +443,8 @@ if Config.EnableDebugging then
         end
     end, false, { help = TranslateCap("debug_xPlayer_get_height") })
     ESX.RegisterCommand("xPlayerGetNationality", "user", function(xPlayer)
-        if xPlayer and xPlayer.get("nationality") then
-            xPlayer.showNotification(TranslateCap("return_debug_xPlayer_get_nationality", xPlayer.get("nationality")))
+        if xPlayer and xPlayer.getNationality() then
+            xPlayer.showNotification(TranslateCap("return_debug_xPlayer_get_nationality", xPlayer.getNationality()))
         else
             xPlayer.showNotification(TranslateCap("error_debug_xPlayer_get_nationality"))
         end
