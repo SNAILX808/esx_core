@@ -1,4 +1,4 @@
-return {
+Config.countryList = {
     { value = "Afghanistan", label = "Afghanistan", flag = "🇦🇫" },
     { value = "Albania", label = "Albania", flag = "🇦🇱" },
     { value = "Algeria", label = "Algeria", flag = "🇩🇿" },
