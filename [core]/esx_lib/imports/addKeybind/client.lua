@@ -81,16 +81,16 @@ function xLib.addKeybind(command_name, label, input_group, key, on_press, on_rel
     keybinds[data.name] = setmetatable(data, keybind_mt)
 
     RegisterCommand('+' .. data.name, function()
+        if not keybinds[data.name] then return end
         if data.disabled or IsPauseMenuActive() then return end
         data.isPressed = true
-        if not keybinds[data.name] then return end
         if data.onPressed then data:onPressed() end
     end)
 
     RegisterCommand('-' .. data.name, function()
+        if not keybinds[data.name] then return end
         if data.disabled or IsPauseMenuActive() then return end
         data.isPressed = false
-        if not keybinds[data.name] then return end
         if data.onReleased then data:onReleased() end
     end)
 
