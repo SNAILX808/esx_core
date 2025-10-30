@@ -28,7 +28,7 @@ end)
 
 RegisterNUICallback("ready", function(_, cb)
     ready = true
-    SendNUIMessage({ type = "config", data = Config })
+    cb({ config = Config })
     cb(1)
 end)
 
