@@ -15,7 +15,7 @@
 ---@field disable? fun(self: CKeybind, toggle: boolean)
 ---@field onPressed? fun(self: CKeybind)
 ---@field onReleased? fun(self: CKeybind)
----@field remove fun(self: CKeybind)
+---@field remove? fun(self: CKeybind)
 ---@field [string] any
 
 ---@class CKeybind : KeybindProps
@@ -59,25 +59,10 @@ function keybind_mt:remove()
     keybinds[self.name] = nil
 end
 
----@param command_name string The keybind name
----@param label string The description to show
----@param input_group? string The input group (default: 'keyboard')
----@param key? string The default key
----@param on_press? function The function to call on press
----@param on_release? function The function to call on release
+---@param data KeybindProps
 ---@return CKeybind
-function xLib.addKeybind(command_name, label, input_group, key, on_press, on_release)
-
-    local data = {
-        name = command_name,
-        description = label,
-        defaultMapper = input_group or 'keyboard',
-        defaultKey = key or '',
-        onPressed = on_press,
-        onReleased = on_release,
-        hash = joaat('+' .. command_name) | 0x80000000
-    }
-
+function xLib.addKeybind(data)
+    data.hash = joaat("+" .. data.name) | 0x80000000
     keybinds[data.name] = setmetatable(data, keybind_mt)
 
     RegisterCommand('+' .. data.name, function()
