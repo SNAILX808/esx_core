@@ -24,6 +24,8 @@
 ---@field txtName string
 xLib.dui = xLib.class()
 
+local resource<const> = GetCurrentResourceName()
+
 ---@type table<string, Dui>
 local Duis = {}
 
@@ -32,10 +34,10 @@ local currentId = 0
 ---@param data DuiProperties
 function xLib.dui:constructor(data)
 	local time = GetGameTimer()
-	local id = ("%s_%s_%s"):format(cache.resource, time, currentId)
+	local id = ("%s_%s_%s"):format(resource, time, currentId)
 	currentId = currentId + 1
-	local dictName = ("ox_lib_dui_dict_%s"):format(id)
-	local txtName = ("ox_lib_dui_txt_%s"):format(id)
+	local dictName = ("%s_dui_dict_%s"):format(resource, id)
+	local txtName = ("%s_lib_dui_txt_%s"):format(resource, id)
 	local duiObject = CreateDui(data.url, data.width, data.height)
 	local duiHandle = GetDuiHandle(duiObject)
 	local runtimeTxd = CreateRuntimeTxd(dictName)
@@ -108,11 +110,11 @@ function xLib.dui:sendMouseWheel(deltaX, deltaY)
 end
 
 AddEventHandler("onResourceStop", function(resourceName)
-	if cache.resource ~= resourceName then return end
+	if resource ~= resourceName then return end
 
-	for _, dui in pairs(Duis) do
-		dui:remove()
-	end
+	for id in next, Duis do
+        Duis[id]:remove()
+    end
 end)
 
 return xLib.dui
