@@ -13,7 +13,8 @@
 ---@field debug? boolean
 
 ---@class Dui
----@field private private { id: string, debug: boolean }
+---@field private_id string
+---@field private_debug boolean
 ---@field url string
 ---@field duiObject number
 ---@field duiHandle string
@@ -24,7 +25,7 @@
 xLib.dui = xLib.class()
 
 ---@type table<string, Dui>
-local duis = {}
+local Duis = {}
 
 local currentId = 0
 
@@ -33,14 +34,14 @@ function xLib.dui:constructor(data)
 	local time = GetGameTimer()
 	local id = ("%s_%s_%s"):format(cache.resource, time, currentId)
 	currentId = currentId + 1
-	local dictName = ('ox_lib_dui_dict_%s'):format(id)
-	local txtName = ('ox_lib_dui_txt_%s'):format(id)
+	local dictName = ("ox_lib_dui_dict_%s"):format(id)
+	local txtName = ("ox_lib_dui_txt_%s"):format(id)
 	local duiObject = CreateDui(data.url, data.width, data.height)
 	local duiHandle = GetDuiHandle(duiObject)
 	local runtimeTxd = CreateRuntimeTxd(dictName)
 	local txdObject = CreateRuntimeTextureFromDuiHandle(runtimeTxd, txtName, duiHandle)
-	self.private.id = id
-	self.private.debug = data.debug or false
+	self.private_id = id
+	self.private_debug = data.debug or false
 	self.url = data.url
 	self.duiObject = duiObject
 	self.duiHandle = duiHandle
@@ -48,20 +49,20 @@ function xLib.dui:constructor(data)
 	self.txdObject = txdObject
 	self.dictName = dictName
 	self.txtName = txtName
-	duis[id] = self
+	Duis[id] = self
 
-	if self.private.debug then
-		print(('Dui %s created'):format(id))
+	if self.private_debug then
+		print(("Dui %s created"):format(id))
 	end
 end
 
 function xLib.dui:remove()
-	SetDuiUrl(self.duiObject, 'about:blank')
+	SetDuiUrl(self.duiObject, "about:blank")
 	DestroyDui(self.duiObject)
-	duis[self.private.id] = nil
+	Duis[self.private_id] = nil
 
-	if self.private.debug then
-		print(('Dui %s removed'):format(self.private.id))
+	if self.private_debug then
+		print(("Dui %s removed"):format(self.private_id))
 	end
 end
 
@@ -70,8 +71,8 @@ function xLib.dui:setUrl(url)
 	self.url = url
 	SetDuiUrl(self.duiObject, url)
 
-	if self.private.debug then
-		print(('Dui %s url set to %s'):format(self.private.id, url))
+	if self.private_debug then
+		print(("Dui %s url set to %s"):format(self.private_id, url))
 	end
 end
 
@@ -79,8 +80,8 @@ end
 function xLib.dui:sendMessage(message)
 	SendDuiMessage(self.duiObject, json.encode(message))
 
-	if self.private.debug then
-		print(('Dui %s message sent with data :'):format(self.private.id), json.encode(message, { indent = true }))
+	if self.private_debug then
+		print(("Dui %s message sent with data :"):format(self.private_id), json.encode(message, { indent = true }))
 	end
 end
 
@@ -90,12 +91,12 @@ function xLib.dui:sendMouseMove(x, y)
 	SendDuiMouseMove(self.duiObject, x, y)
 end
 
----@param button 'left' | 'middle' | 'right'
+---@param button "left" | "middle" | "right"
 function xLib.dui:sendMouseDown(button)
 	SendDuiMouseDown(self.duiObject, button)
 end
 
----@param button 'left' | 'middle' | 'right'
+---@param button "left" | "middle" | "right"
 function xLib.dui:sendMouseUp(button)
 	SendDuiMouseUp(self.duiObject, button)
 end
@@ -106,11 +107,10 @@ function xLib.dui:sendMouseWheel(deltaX, deltaY)
 	SendDuiMouseWheel(self.duiObject, deltaY, deltaX)
 end
 
-
-AddEventHandler('onResourceStop', function(resourceName)
+AddEventHandler("onResourceStop", function(resourceName)
 	if cache.resource ~= resourceName then return end
 
-	for _, dui in pairs(duis) do
+	for _, dui in pairs(Duis) do
 		dui:remove()
 	end
 end)
