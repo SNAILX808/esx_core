@@ -60,7 +60,7 @@ end
 
 -- Stop raycasting
 function xLib.Raycast:Stop()
-    if not self and not self.active then print('already stopped') return end
+    if not self and not self.active then return end
     self.active = false
     if self._thread then
         self._thread = nil
