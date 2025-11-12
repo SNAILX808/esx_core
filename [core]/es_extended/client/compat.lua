@@ -23,3 +23,6 @@ ESX.Game.GetRaycastResult = function(raycast)
     end
     return nil
 end
+ESX.Game.GetClosestEntity = xLib.entity.closest
+EnumerateEntitiesWithinDistance = xLib.entity.EnumerateWithinDistance
+ESX.Game.Teleport = xLib.entity.Teleport
