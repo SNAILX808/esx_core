@@ -690,27 +690,6 @@ function ESX.Game.IsSpawnPointClear(coords, maxDistance)
     return #ESX.Game.GetVehiclesInArea(coords, maxDistance) == 0
 end
 
----@param shape integer The shape to get the test result from
----@return boolean, table, table, integer, integer
-function ESX.Game.GetShapeTestResultSync(shape)
-	local handle, hit, coords, normal, material, entity
-	repeat
-        handle, hit, coords, normal, material, entity = GetShapeTestResultIncludingMaterial(shape)
-        Wait(0)
-	until handle ~= 1
-	return hit, coords, normal, material, entity
-end
-
----@param depth number The depth to raycast
----@vararg any The arguments to pass to the shape test
----@return table, boolean, table, table, integer, integer
-function ESX.Game.RaycastScreen(depth, ...)
-	local world, normal = GetWorldCoordFromScreenCoord(.5, .5)
-	local origin = world + normal
-	local target = world + normal * depth
-	return target, ESX.Game.GetShapeTestResultSync(StartShapeTestLosProbe(origin.x, origin.y, origin.z, target.x, target.y, target.z, ...))
-end
-
 ---@return integer | nil, vector3 | nil
 function ESX.Game.GetVehicleInDirection()
     local _, hit, coords, _, _, entity = ESX.Game.RaycastScreen(5, 10, ESX.PlayerData.ped)
